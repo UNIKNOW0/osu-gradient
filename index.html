@@ -1,0 +1,1468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>osu gradient</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/lucide.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0A0A0A;
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Animations */
+        @keyframes slideUp {
+            from {
+                transform: translate(-50%, -40%);
+                opacity: 0;
+            }
+            to {
+                transform: translate(-50%, -50%);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        @keyframes modalSlideOut {
+            from {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+            to {
+                opacity: 0;
+                transform: scale(0.9) translateY(-20px);
+            }
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .logo {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, #FF9F1C, #FF6B35);
+            border-radius: 6px;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .btn-guide {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 10px 20px;
+            color: #FF9F1C;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .btn-guide:hover {
+            background: rgba(255,159,28,0.1);
+        }
+
+        .lang-switcher {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 6px;
+            display: flex;
+            gap: 4px;
+        }
+
+        .lang-btn {
+            background: transparent;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            color: #fff;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .lang-btn.active {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .bg-control {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .bg-indicator {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #FF9F1C;
+        }
+
+        /* Range Input */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2px;
+            outline: none;
+            width: 100px;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            background: #FF9F1C;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 14px;
+            height: 14px;
+            background: #FF9F1C;
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+        }
+
+        /* Main Layout */
+        .main-layout {
+            display: flex;
+            gap: 20px;
+        }
+
+        .sidebar {
+            width: 320px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .panel {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 20px;
+        }
+
+        .panel-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.5);
+            letter-spacing: 0.5px;
+            margin-bottom: 15px;
+        }
+
+        .color-input-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .color-square {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            cursor: pointer;
+            border: 2px solid rgba(255,255,255,0.15);
+            transition: transform 0.2s;
+            flex-shrink: 0;
+        }
+
+        .color-square:hover {
+            transform: scale(1.05);
+        }
+
+        .hex-input {
+            flex: 1;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 12px;
+            color: #fff;
+            font-family: monospace;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .presets {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .preset {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            cursor: pointer;
+            border: 2px solid rgba(255,255,255,0.1);
+            transition: transform 0.2s;
+        }
+
+        .preset:hover {
+            transform: scale(1.1);
+        }
+
+        .mode-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+        }
+
+        .mode-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 10px;
+            color: #fff;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .mode-btn.active {
+            background: #FF9F1C;
+            color: #000;
+        }
+
+        .interp-btn {
+            width: 100%;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 12px;
+            color: #fff;
+            cursor: pointer;
+            font-size: 13px;
+            margin-bottom: 8px;
+            text-align: left;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .interp-btn.active {
+            background: #FF9F1C;
+            color: #000;
+        }
+
+        .toggle {
+            width: 40px;
+            height: 22px;
+            border-radius: 11px;
+            background: rgba(255,255,255,0.1);
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .toggle.active {
+            background: #FF9F1C;
+        }
+
+        .toggle-handle {
+            width: 18px;
+            height: 18px;
+            border-radius: 10px;
+            background: #fff;
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            transition: all 0.3s;
+
+
+        }
+
+        .toggle.active .toggle-handle {
+            left: 20px;
+        }
+
+        .content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .input-box-wrapper {
+            position: relative;
+            width: 920px;
+        }
+
+        .input-box {
+            width: 920px;
+            position: relative;
+            background: hsl(235, 15%, 25%);
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 40px 15px 15px 15px;
+            box-sizing: border-box;
+        }
+
+        .gradient-circle {
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #FF9F1C;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(0,0,0,0.5);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+            z-index: 10;
+        }
+
+        .input-textarea {
+            width: 890px;
+            height: 350px;
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            resize: none;
+            outline: none;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+            overflow-wrap: break-word;
+            padding: 0;
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .output-box {
+            width: 920px;
+            background: hsl(235, 15%, 25%);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 15px;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        .output-content {
+            width: 890px;
+            min-height: 350px;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            word-wrap: break-word;
+            text-align: left;
+            white-space: pre-wrap;
+            overflow-wrap: break-word;
+            line-height: 1.5;
+        }
+
+        .copy-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 8px 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #fff;
+            font-size: 12px;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            padding: 20px;
+        }
+
+        .modal-overlay.fadeIn {
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-overlay.fadeOut {
+            animation: fadeOut 0.3s ease;
+        }
+
+        .modal {
+            background: rgba(20,20,20,0.95);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 750px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+
+        .modal.slideIn {
+            animation: modalSlideIn 0.4s ease;
+        }
+
+        .modal.slideOut {
+            animation: modalSlideOut 0.3s ease;
+        }
+
+        .modal-title {
+            font-size: 28px;
+            margin-bottom: 30px;
+            color: #FF9F1C;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .guide-step {
+            margin-bottom: 35px;
+        }
+
+        .step-title {
+            font-size: 18px;
+            margin-bottom: 12px;
+            color: #fff;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .step-number {
+            background: linear-gradient(135deg, #FF9F1C, #FF6B35);
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .step-text {
+            font-size: 15px;
+            line-height: 1.6;
+            color: rgba(255,255,255,0.8);
+            margin-bottom: 15px;
+        }
+
+        .visual-example {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .info-box {
+            background: rgba(255,159,28,0.1);
+            border: 1px solid rgba(255,159,28,0.3);
+            borderRadius: 12px;
+            padding: 15px;
+            font-size: 14px;
+            color: rgba(255,255,255,0.7);
+        }
+
+        .btn-primary {
+            width: 100%;
+            background: #FF9F1C;
+            border: none;
+            border-radius: 12px;
+            padding: 15px;
+            color: #000;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.02);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .footer {
+    display: block;
+    width: 100%;
+    text-align: center;
+    margin-top: 30px;
+    font-size: 11px;
+    color: rgba(255,255,255,0.3);
+}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">
+                <div class="logo-icon"></div>
+                <span id="logo-text">osu gradient</span>
+            </div>
+            <div class="header-controls">
+                <button class="btn-guide" onclick="openGuide()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                    <span id="how-to-use-text">How to use</span>
+                </button>
+                <div class="lang-switcher">
+                    <button class="lang-btn active" data-lang="en" onclick="setLanguage('en')">EN</button>
+                    <button class="lang-btn" data-lang="ru" onclick="setLanguage('ru')">RU</button>
+                </div>
+                <div class="bg-control">
+                    <div class="bg-indicator"></div>
+                    <input type="range" min="0" max="30" value="15" id="bg-slider" oninput="updateBgColor(this.value)">
+                </div>
+            </div>
+        </div>
+
+        <div class="main-layout">
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <!-- Configuration Panel -->
+                <div class="panel">
+                    <div class="panel-title" id="config-title">CONFIGURATION</div>
+                    
+                    <div style="font-size: 13px; margin-bottom: 10px; color: rgba(255,255,255,0.7);" id="grad-start-label">Gradient Start</div>
+                    <div class="color-input-group">
+                        <div class="color-square" id="color1-square" style="background: #FF9F1C;" onclick="openColorPicker(1)"></div>
+                        <input type="text" class="hex-input" id="hex1-input" value="#FF9F1C" oninput="updateColorFromHex(1, this.value)">
+                    </div>
+
+                    <div style="height: 1px; background: rgba(255,255,255,0.1); margin: 20px 0; position: relative;">
+                        <div style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); background: rgba(255,255,255,0.1); border-radius: 6px; padding: 4px 8px; font-size: 11px;">↓</div>
+                    </div>
+
+                    <div style="font-size: 13px; margin-bottom: 10px; color: rgba(255,255,255,0.7);" id="grad-end-label">Gradient End</div>
+                    <div class="color-input-group" style="margin-bottom: 0;">
+                        <div class="color-square" id="color2-square" style="background: #A855F7;" onclick="openColorPicker(2)"></div>
+                        <input type="text" class="hex-input" id="hex2-input" value="#A855F7" oninput="updateColorFromHex(2, this.value)">
+                    </div>
+
+                    <div style="margin-top: 25px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <span class="panel-title" style="margin: 0;" id="presets-label">PRESETS</span>
+                            <button style="background: transparent; border: none; color: #FF9F1C; cursor: pointer; font-size: 11px; font-weight: 600; display: flex; align-items: center; gap: 6px;" onclick="randomGradient()">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="16 3 21 3 21 8"></polyline>
+                                    <line x1="4" y1="20" x2="21" y2="3"></line>
+                                    <polyline points="21 16 21 21 16 21"></polyline>
+                                    <line x1="15" y1="15" x2="21" y2="21"></line>
+                                    <line x1="4" y1="4" x2="9" y2="9"></line>
+                                </svg>
+                                <span id="random-label">RANDOM</span>
+                            </button>
+                        </div>
+                        <div class="presets">
+                            <div class="preset" style="background: linear-gradient(135deg, #3B82F6, #06B6D4);" onclick="applyPreset('#3B82F6', '#06B6D4')"></div>
+                            <div class="preset" style="background: linear-gradient(135deg, #10B981, #06B6D4);" onclick="applyPreset('#10B981', '#06B6D4')"></div>
+                            <div class="preset" style="background: linear-gradient(135deg, #F97316, #EF4444);" onclick="applyPreset('#F97316', '#EF4444')"></div>
+                            <div class="preset" style="background: linear-gradient(135deg, #A855F7, #EC4899);" onclick="applyPreset('#A855F7', '#EC4899')"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gradient Mode Panel -->
+                <div class="panel">
+                    <div class="panel-title" id="mode-title">GRADIENT MODE</div>
+                    <div class="mode-grid" style="margin-bottom: 12px;">
+                        <button class="mode-btn active" data-mode="RGB" onclick="setGradientMode('RGB')">RGB</button>
+                        <button class="mode-btn" data-mode="HSL" onclick="setGradientMode('HSL')">HSL</button>
+                        <button class="mode-btn" data-mode="HSV" onclick="setGradientMode('HSV')">HSV</button>
+                    </div>
+                    <div class="mode-grid">
+                        <button class="mode-btn" data-mode="OKLAB" onclick="setGradientMode('OKLAB')">OKLAB</button>
+                        <button class="mode-btn" data-mode="OKLCH" onclick="setGradientMode('OKLCH')">OKLCH</button>
+                    </div>
+                </div>
+
+                <!-- Interpolation Panel -->
+                <div class="panel">
+                    <div class="panel-title" id="interp-title">INTERPOLATION</div>
+                    <button class="interp-btn active" data-interp="Linear" onclick="setInterpolation('Linear')">
+                        <span id="interp-linear">Linear</span>
+                        <div style="width: 6px; height: 6px; border-radius: 50%; background: #000;"></div>
+                    </button>
+                    <button class="interp-btn" data-interp="Smoothstep" onclick="setInterpolation('Smoothstep')">
+                        <span id="interp-smoothstep">Smoothstep</span>
+                    </button>
+                    <button class="interp-btn" data-interp="Smootherstep" onclick="setInterpolation('Smootherstep')" style="margin-bottom: 0;">
+                        <span id="interp-smootherstep">Smootherstep</span>
+                    </button>
+                </div>
+
+                <!-- Dithering Panel -->
+                <div class="panel">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <span class="panel-title" style="margin: 0;" id="dither-title">DITHERING</span>
+                        <div class="toggle" id="dither-toggle" onclick="toggleDithering()">
+                            <div class="toggle-handle"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 12px; color: rgba(255,255,255,0.6);">
+                            <span id="intensity-label">Intensity</span>
+                            <span id="intensity-value">50%</span>
+                        </div>
+                        <input type="range" min="0" max="100" value="50" id="dither-slider" style="width: 100%;" oninput="updateDithering(this.value)">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="content">
+                <!-- Input Source -->
+                <div class="panel">
+                    <div class="panel-title" id="input-title">INPUT SOURCE</div>
+                    <div class="input-box-wrapper">
+                        <div class="input-box" id="input-box">
+                            <!-- Gradient circles will be added here by JS -->
+                            <textarea class="input-textarea" id="input-textarea" placeholder="Enter your text here..." oninput="updateGradient()">Dynamic Gradient</textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Render Preview -->
+                <div class="panel">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <span class="panel-title" style="margin: 0;" id="preview-title">RENDER PREVIEW</span>
+                        <button class="copy-btn" onclick="copyOutput()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="copy-icon">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="output-box" id="output-box">
+                        <div class="output-content" id="output-content"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <a id="footer-text" class="footer" href="https://www.twitch.tv/uniknow" target="_blank" rel="noopener noreferrer">made by uniknow
+        </a>
+    </div>
+
+    <!-- Guide Modal -->
+    <div id="guide-modal" class="modal-overlay hidden" onclick="closeGuideIfOverlay(event)">
+        <div class="modal" onclick="event.stopPropagation()" id="guide-modal-content">
+            <h2 class="modal-title">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+                <span id="guide-title">How to use osu gradient</span>
+            </h2>
+
+            <div id="guide-content">
+                <!-- Guide steps will be populated by JS -->
+            </div>
+
+            <button class="btn-primary" onclick="closeGuide()" id="guide-close-btn">Got it!</button>
+        </div>
+    </div>
+
+    <script>
+        // State
+        let currentLanguage = 'en';
+        let bgLightness = 15;
+        let gradient1 = { color: '#FF9F1C', position: 'top-left' };
+        let gradient2 = { color: '#A855F7', position: 'bottom-center' };
+        let gradientMode = 'RGB';
+        let interpolationMode = 'Linear';
+        let ditheringEnabled = true;
+        let ditheringIntensity = 0;
+        let bbCodeOutput = '';
+        let guideClosing = false;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            const systemLang = navigator.language.toLowerCase();
+            setLanguage(systemLang.startsWith('en') ? 'ru' : 'en');
+            initGradientCircles();
+            updateGradient();
+        });
+
+        // Translations
+        const translations = {
+            en: {
+                title: 'osu gradient',
+                howToUse: 'How to use',
+                configTitle: 'CONFIGURATION',
+                gradStart: 'Gradient Start',
+                gradEnd: 'Gradient End',
+                presets: 'PRESETS',
+                random: 'RANDOM',
+                modeTitle: 'GRADIENT MODE',
+                interpTitle: 'INTERPOLATION',
+                linear: 'Linear',
+                smoothstep: 'Smoothstep',
+                smootherstep: 'Smootherstep',
+                ditherTitle: 'DITHERING',
+                intensity: 'Intensity',
+                inputTitle: 'INPUT SOURCE',
+                previewTitle: 'RENDER PREVIEW',
+                madeBy: 'made by uniknow',
+                guideTitle: 'How to use osu gradient',
+                guideClose: 'Got it!',
+                step1Title: '1. Set Gradient Direction',
+                step1Text: 'Click the orange circles on the input box to set gradient direction. Left click sets the START position (first color), right click sets the END position (second color). The gradient will flow between these two points.',
+                step2Title: '2. Choose Colors',
+                step2Text: 'Click on the colored squares in Configuration or on the orange circles to open the color picker. You can use the color wheel for visual selection or type HEX codes directly. Use presets for quick color combinations or click RANDOM for surprise!',
+                step3Title: '3. Customize Settings',
+                step3Text: 'Choose Gradient Mode (OKLCH recommended for smoothest results), select interpolation curve, and enable dithering to reduce color banding. All changes apply in real-time.',
+                step4Title: '4. Copy Result',
+                step4Text: 'Type or paste your text in the input box. The preview shows how it will look. Click the copy button in the preview to copy BBCode format like [color=#FF9F1C]text[/color] ready to paste anywhere!'
+            },
+            ru: {
+                title: 'osu градиент',
+                howToUse: 'Как пользоваться',
+                configTitle: 'КОНФИГУРАЦИЯ',
+                gradStart: 'Начало градиента',
+                gradEnd: 'Конец градиента',
+                presets: 'ПРЕСЕТЫ',
+                random: 'СЛУЧАЙНЫЙ',
+                modeTitle: 'РЕЖИМ ГРАДИЕНТА',
+                interpTitle: 'ИНТЕРПОЛЯЦИЯ',
+                linear: 'Линейная',
+                smoothstep: 'Сглаживание',
+                smootherstep: 'Усиленное сглаживание',
+                ditherTitle: 'ДИЗЕРИНГ',
+                intensity: 'Интенсивность',
+                inputTitle: 'ИСТОЧНИК ВВОДА',
+                previewTitle: 'ПРЕДПРОСМОТР',
+                madeBy: 'сделано uniknow',
+                guideTitle: 'Как пользоваться osu gradient',
+                guideClose: 'Понятно!',
+                step1Title: '1. Установите направление градиента',
+                step1Text: 'Кликайте на оранжевые кружки на поле ввода для выбора направления. Левая кнопка мыши устанавливает НАЧАЛО (первый цвет), правая кнопка - КОНЕЦ (второй цвет). Градиент будет течь между этими точками.',
+                step2Title: '2. Выберите цвета',
+                step2Text: 'Нажмите на цветные квадраты в Конфигурации или на оранжевые кружки для открытия палитры. Используйте цветовой круг для визуального выбора или вводите HEX коды напрямую. Используйте пресеты для быстрого выбора или СЛУЧАЙНЫЙ для сюрприза!',
+                step3Title: '3. Настройте параметры',
+                step3Text: 'Выберите режим градиента (OKLCH рекомендуется для плавности), кривую интерполяции и включите дизеринг для уменьшения полос. Все изменения применяются в реальном времени.',
+                step4Title: '4. Скопируйте результат',
+                step4Text: 'Введите или вставьте текст в поле ввода. Предпросмотр покажет, как это будет выглядеть. Нажмите кнопку копирования для получения BBCode формата типа [color=#FF9F1C]текст[/color] готового к вставке!'
+            }
+        };
+
+        function setLanguage(lang) {
+            currentLanguage = lang;
+            const t = translations[lang];
+            
+            document.getElementById('logo-text').textContent = t.title;
+            document.getElementById('how-to-use-text').textContent = t.howToUse;
+            document.getElementById('config-title').textContent = t.configTitle;
+            document.getElementById('grad-start-label').textContent = t.gradStart;
+            document.getElementById('grad-end-label').textContent = t.gradEnd;
+            document.getElementById('presets-label').textContent = t.presets;
+            document.getElementById('random-label').textContent = t.random;
+            document.getElementById('mode-title').textContent = t.modeTitle;
+            document.getElementById('interp-title').textContent = t.interpTitle;
+            document.getElementById('interp-linear').textContent = t.linear;
+            document.getElementById('interp-smoothstep').textContent = t.smoothstep;
+            document.getElementById('interp-smootherstep').textContent = t.smootherstep;
+            document.getElementById('dither-title').textContent = t.ditherTitle;
+            document.getElementById('intensity-label').textContent = t.intensity;
+            document.getElementById('input-title').textContent = t.inputTitle;
+            document.getElementById('preview-title').textContent = t.previewTitle;
+            document.getElementById('footer-text').textContent = t.madeBy;
+            document.getElementById('guide-title').textContent = t.guideTitle;
+            document.getElementById('guide-close-btn').textContent = t.guideClose;
+
+            // Update lang buttons
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.lang === lang);
+            });
+
+            updateGuideContent();
+        }
+
+        function updateGuideContent() {
+            const t = translations[currentLanguage];
+            document.getElementById('guide-content').innerHTML = `
+                <div class="guide-step">
+                    <h3 class="step-title">
+                        <span class="step-number">1</span>
+                        ${t.step1Title}
+                    </h3>
+                    <p class="step-text">${t.step1Text}</p>
+                    <div class="visual-example">
+                        <div style="position: relative; width: 200px; height: 120px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                            <div style="position: absolute; top: 5px; left: 5px; width: 12px; height: 12px; border-radius: 50%; background: #FF9F1C; border: 2px solid #000; box-shadow: 0 0 8px #FF9F1C;"></div>
+                            <div style="position: absolute; bottom: 5px; right: 5px; width: 12px; height: 12px; border-radius: 50%; background: #A855F7; border: 2px solid #000; box-shadow: 0 0 8px #A855F7;"></div>
+                            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 11px; color: rgba(255,255,255,0.4);">Input Box</div>
+                        </div>
+                    </div>
+                    <div class="info-box">
+                        <div style="margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
+                            <div style="width: 12px; height: 12px; border-radius: 50%; background: #FF9F1C;"></div>
+                            <strong style="color: #FF9F1C;">LMB (Left Click):</strong> Set START position
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <div style="width: 12px; height: 12px; border-radius: 50%; background: #A855F7;"></div>
+                            <strong style="color: #A855F7;">RMB (Right Click):</strong> Set END position
+                        </div>
+                    </div>
+                </div>
+
+                <div class="guide-step">
+                    <h3 class="step-title">
+                        <span class="step-number">2</span>
+                        ${t.step2Title}
+                    </h3>
+                    <p class="step-text">${t.step2Text}</p>
+                    <div class="visual-example" style="display: flex; gap: 15px; align-items: center; justify-content: center; flex-wrap: wrap;">
+                        <div style="text-align: center;">
+                            <div style="width: 50px; height: 50px; background: #FF9F1C; border-radius: 10px; margin-bottom: 8px; border: 2px solid rgba(255,255,255,0.2);"></div>
+                            <div style="font-size: 11px; color: rgba(255,255,255,0.5);">Click to edit</div>
+                        </div>
+                        <div style="font-size: 24px; color: rgba(255,255,255,0.3);">→</div>
+                        <div style="width: 80px; height: 80px; border-radius: 50%; background: conic-gradient(red, yellow, lime, cyan, blue, magenta, red); position: relative;">
+                            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 8px; height: 8px; border-radius: 50%; background: #fff; border: 2px solid #000;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="guide-step">
+                    <h3 class="step-title">
+                        <span class="step-number">3</span>
+                        ${t.step3Title}
+                    </h3>
+                    <p class="step-text">${t.step3Text}</p>
+                    <div class="visual-example" style="padding: 15px; font-size: 13px;">
+                        <div style="display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap;">
+                            <div style="padding: 8px 12px; background: #FF9F1C; color: #000; border-radius: 6px; font-weight: 600;">OKLCH</div>
+                            <div style="padding: 8px 12px; background: rgba(255,255,255,0.1); border-radius: 6px;">RGB</div>
+                            <div style="padding: 8px 12px; background: rgba(255,255,255,0.1); border-radius: 6px;">HSL</div>
+                        </div>
+                        <div style="color: rgba(255,255,255,0.6); font-size: 12px;">✨ OKLCH = smoothest gradients</div>
+                    </div>
+                </div>
+
+                <div class="guide-step">
+                    <h3 class="step-title">
+                        <span class="step-number">4</span>
+                        ${t.step4Title}
+                    </h3>
+                    <p class="step-text">${t.step4Text}</p>
+                    <div style="background: rgba(78,205,196,0.1); border: 1px solid rgba(78,205,196,0.3); border-radius: 12px; padding: 20px; position: relative;">
+                        <div style="font-family: monospace; font-size: 13px; color: rgba(255,255,255,0.8); margin-bottom: 10px; word-break: break-all;">
+                            [color=#FF9F1C]H[/color][color=#E86B3C]e[/color][color=#D1435A]l[/color][color=#BA1B77]l[/color][color=#AD343E]o[/color]
+                        </div>
+                        <div style="position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.1); padding: 6px 10px; border-radius: 6px; font-size: 11px; display: flex; align-items: center; gap: 5px;">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                            Copy
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function updateBgColor(value) {
+            bgLightness = parseInt(value);
+            const inputBox = document.getElementById('input-box');
+            const outputBox = document.getElementById('output-box');
+            inputBox.style.background = `hsl(235, ${bgLightness}%, 25%)`;
+            outputBox.style.background = `hsl(235, ${bgLightness}%, 25%)`;
+        }
+
+        function setGradientMode(mode) {
+            gradientMode = mode;
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.mode === mode);
+            });
+            updateGradient();
+        }
+
+        function setInterpolation(mode) {
+            interpolationMode = mode;
+            document.querySelectorAll('.interp-btn').forEach(btn => {
+                const isActive = btn.dataset.interp === mode;
+                btn.classList.toggle('active', isActive);
+                const dot = btn.querySelector('div');
+                if (dot) dot.style.display = isActive ? 'block' : 'none';
+            });
+            updateGradient();
+        }
+
+        function toggleDithering() {
+            ditheringEnabled = !ditheringEnabled;
+            const toggle = document.getElementById('dither-toggle');
+            toggle.classList.toggle('active', ditheringEnabled);
+            updateGradient();
+        }
+
+        function updateDithering(value) {
+            ditheringIntensity = parseInt(value);
+            document.getElementById('intensity-value').textContent = value + '%';
+            if (ditheringEnabled) updateGradient();
+        }
+
+        function updateColorFromHex(num, hex) {
+            let cleaned = hex.replace('#', '').toUpperCase();
+            if (num === 1) {
+                document.getElementById('hex1-input').value = '#' + cleaned;
+                if (cleaned.length === 6 && /^[0-9A-F]+$/.test(cleaned)) {
+                    gradient1.color = '#' + cleaned;
+                    document.getElementById('color1-square').style.background = '#' + cleaned;
+                    updateGradient();
+                }
+            } else {
+                document.getElementById('hex2-input').value = '#' + cleaned;
+                if (cleaned.length === 6 && /^[0-9A-F]+$/.test(cleaned)) {
+                    gradient2.color = '#' + cleaned;
+                    document.getElementById('color2-square').style.background = '#' + cleaned;
+                    updateGradient();
+                }
+            }
+        }
+
+        function applyPreset(color1, color2) {
+            gradient1.color = color1;
+            gradient2.color = color2;
+            document.getElementById('color1-square').style.background = color1;
+            document.getElementById('color2-square').style.background = color2;
+            document.getElementById('hex1-input').value = color1.toUpperCase();
+            document.getElementById('hex2-input').value = color2.toUpperCase();
+            updateGradient();
+        }
+
+        function randomGradient() {
+            const randomColor = () => '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0').toUpperCase();
+            const randomPos = () => {
+                const positions = ['top-left', 'top-center', 'top-right', 'center-left', 'center-right', 'bottom-left', 'bottom-center', 'bottom-right'];
+                return positions[Math.floor(Math.random() * positions.length)];
+            };
+            
+            const c1 = randomColor();
+            const c2 = randomColor();
+            
+            gradient1.color = c1;
+            gradient1.position = randomPos();
+            gradient2.color = c2;
+            gradient2.position = randomPos();
+            
+            document.getElementById('color1-square').style.background = c1;
+            document.getElementById('color2-square').style.background = c2;
+            document.getElementById('hex1-input').value = c1;
+            document.getElementById('hex2-input').value = c2;
+            
+            updateCircleColors();
+            updateGradient();
+        }
+
+        function initGradientCircles() {
+            const positions = [
+                { id: 'top-left', x: 0, y: 0 },
+                { id: 'top-center', x: 50, y: 0 },
+                { id: 'top-right', x: 100, y: 0 },
+                { id: 'center-left', x: 0, y: 50 },
+                { id: 'center-right', x: 100, y: 50 },
+                { id: 'bottom-left', x: 0, y: 100 },
+                { id: 'bottom-center', x: 50, y: 100 },
+                { id: 'bottom-right', x: 100, y: 100 }
+            ];
+
+            const inputBox = document.getElementById('input-box');
+            positions.forEach(pos => {
+                const circle = document.createElement('div');
+                circle.className = 'gradient-circle';
+                circle.dataset.position = pos.id;
+                
+                const leftPos = pos.x === 0 ? '15px' : pos.x === 50 ? 'calc(50% - 7px)' : 'calc(100% - 29px)';
+                const topPos = pos.y === 0 ? '15px' : pos.y === 50 ? 'calc(50% - 7px)' : 'calc(100% - 29px)';
+                
+                circle.style.left = leftPos;
+                circle.style.top = topPos;
+                
+                circle.addEventListener('click', () => {
+                    gradient1.position = pos.id;
+                    updateCircleColors();
+                    updateGradient();
+                });
+                
+                circle.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                    gradient2.position = pos.id;
+                    updateCircleColors();
+                    updateGradient();
+                });
+                
+                inputBox.appendChild(circle);
+            });
+            
+            updateCircleColors();
+        }
+
+        function updateCircleColors() {
+            document.querySelectorAll('.gradient-circle').forEach(circle => {
+                const pos = circle.dataset.position;
+                if (pos === gradient1.position) {
+                    circle.style.background = gradient1.color;
+                    circle.style.boxShadow = `0 0 8px ${gradient1.color}`;
+                } else if (pos === gradient2.position) {
+                    circle.style.background = gradient2.color;
+                    circle.style.boxShadow = `0 0 8px ${gradient2.color}`;
+                } else {
+                    circle.style.background = '#FF9F1C';
+                    circle.style.boxShadow = '0 2px 8px rgba(0,0,0,0.4)';
+                }
+            });
+        }
+
+        // ==================== GRADIENT GENERATION ====================
+        
+        function clamp01(x) {
+            return Math.max(0, Math.min(1, x));
+        }
+
+        function hexToRgbInt(hex) {
+            const s = hex.replace('#', '');
+            return [
+                parseInt(s.substr(0, 2), 16),
+                parseInt(s.substr(2, 2), 16),
+                parseInt(s.substr(4, 2), 16)
+            ];
+        }
+
+        function rgbIntToHex(rgb) {
+            const [r, g, b] = rgb.map(v => Math.max(0, Math.min(255, Math.round(v))));
+            return '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0').toUpperCase()).join('');
+        }
+
+        function rgbIntToNorm(rgb) {
+            return rgb.map(v => v / 255);
+        }
+
+        function rgbNormToInt(rgb) {
+            return rgb.map(v => Math.round(clamp01(v) * 255));
+        }
+
+        function srgbToLinear(c) {
+            return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+        }
+
+        function linearToSrgb(c) {
+            return c <= 0.0031308 ? 12.92 * c : 1.055 * Math.pow(c, 1/2.4) - 0.055;
+        }
+
+        function rgbNormToOklab([r, g, b]) {
+            const lr = srgbToLinear(r), lg = srgbToLinear(g), lb = srgbToLinear(b);
+            const L_ = 0.4122214708*lr + 0.5363325363*lg + 0.0514459929*lb;
+            const M_ = 0.2119034982*lr + 0.6806995451*lg + 0.1073969566*lb;
+            const S_ = 0.0883024619*lr + 0.2817188376*lg + 0.6299787005*lb;
+            const l_ = L_ > 0 ? Math.pow(L_, 1/3) : 0;
+            const m_ = M_ > 0 ? Math.pow(M_, 1/3) : 0;
+            const s_ = S_ > 0 ? Math.pow(S_, 1/3) : 0;
+            const L = 0.2104542553*l_ + 0.7936177850*m_ - 0.0040720468*s_;
+            const a = 1.9779984951*l_ - 2.4285922050*m_ + 0.4505937099*s_;
+            const bOk = 0.0259040371*l_ + 0.7827717662*m_ - 0.8086757660*s_;
+            return [L, a, bOk];
+        }
+
+        function oklabToRgbNorm([L, a, b]) {
+            const l_ = L + 0.3963377774*a + 0.2158037573*b;
+            const m_ = L - 0.1055613458*a - 0.0638541728*b;
+            const s_ = L - 0.0894841775*a - 0.2914855480*b;
+            const l = Math.pow(l_, 3);
+            const m = Math.pow(m_, 3);
+            const s = Math.pow(s_, 3);
+            const lr = (+4.0767416621*l) + (-3.3077115913*m) + (+0.2309699292*s);
+            const lg = (-1.2684380046*l) + (+2.6097574011*m) + (-0.3413193965*s);
+            const lb = (-0.0041960863*l) + (-0.7034186147*m) + (+1.7076147010*s);
+            return [clamp01(linearToSrgb(lr)), clamp01(linearToSrgb(lg)), clamp01(linearToSrgb(lb))];
+        }
+
+        function oklabToOklch([L, a, b]) {
+            const C = Math.sqrt(a*a + b*b);
+            const h_rad = Math.atan2(b, a);
+            const h = (h_rad / (2 * Math.PI) + 1) % 1;
+            return [L, C, h];
+        }
+
+        function oklchToOklab([L, C, h]) {
+            const h_rad = h * 2 * Math.PI;
+            return [L, C * Math.cos(h_rad), C * Math.sin(h_rad)];
+        }
+
+        function rgbToHsl(r, g, b) {
+            const max = Math.max(r, g, b), min = Math.min(r, g, b);
+            let h, s, l = (max + min) / 2;
+            if (max === min) {
+                h = s = 0;
+            } else {
+                const d = max - min;
+                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                switch (max) {
+                    case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+                    case g: h = ((b - r) / d + 2) / 6; break;
+                    case b: h = ((r - g) / d + 4) / 6; break;
+                }
+            }
+            return [h, s, l];
+        }
+
+        function hslToRgb(h, s, l) {
+            let r, g, b;
+            if (s === 0) {
+                r = g = b = l;
+            } else {
+                const hue2rgb = (p, q, t) => {
+                    if (t < 0) t += 1;
+                    if (t > 1) t -= 1;
+                    if (t < 1/6) return p + (q - p) * 6 * t;
+                    if (t < 1/2) return q;
+                    if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+                    return p;
+                };
+                const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+                const p = 2 * l - q;
+                r = hue2rgb(p, q, h + 1/3);
+                g = hue2rgb(p, q, h);
+                b = hue2rgb(p, q, h - 1/3);
+            }
+            return [r, g, b];
+        }
+
+        function rgbToHsv(r, g, b) {
+            const max = Math.max(r, g, b), min = Math.min(r, g, b);
+            const v = max;
+            const d = max - min;
+            const s = max === 0 ? 0 : d / max;
+            let h;
+            if (max === min) {
+                h = 0;
+            } else {
+                switch (max) {
+                    case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+                    case g: h = ((b - r) / d + 2) / 6; break;
+                    case b: h = ((r - g) / d + 4) / 6; break;
+                }
+            }
+            return [h, s, v];
+        }
+
+        function hsvToRgb(h, s, v) {
+            const i = Math.floor(h * 6);
+            const f = h * 6 - i;
+            const p = v * (1 - s);
+            const q = v * (1 - f * s);
+            const t = v * (1 - (1 - f) * s);
+            let r, g, b;
+            switch (i % 6) {
+                case 0: r = v; g = t; b = p; break;
+                case 1: r = q; g = v; b = p; break;
+                case 2: r = p; g = v; b = t; break;
+                case 3: r = p; g = q; b = v; break;
+                case 4: r = t; g = p; b = v; break;
+                case 5: r = v; g = p; b = q; break;
+            }
+            return [r, g, b];
+        }
+
+        function shortestHue(a_h, b_h, t) {
+            let dh = (b_h - a_h) % 1;
+            if (dh > 0.5) dh -= 1;
+            if (dh < -0.5) dh += 1;
+            return (a_h + dh * t + 1) % 1;
+        }
+
+        function smoothstepCurve(t) {
+            return t * t * (3 - 2*t);
+        }
+
+        function smootherstepCurve(t) {
+            return t*t*t*(t*(t*6 - 15) + 10);
+        }
+
+        function parsePosition(posId) {
+            const map = {
+                'top-left': [0, 0], 'top-center': [0.5, 0], 'top-right': [1, 0],
+                'center-left': [0, 0.5], 'center-right': [1, 0.5],
+                'bottom-left': [0, 1], 'bottom-center': [0.5, 1], 'bottom-right': [1, 1]
+            };
+            return map[posId] || [0.5, 0.5];
+        }
+
+        function computeT(x, y, w, h, startPt, endPt) {
+            const u = w <= 1 ? 0.5 : x / (w - 1);
+            const v = h <= 1 ? 0.5 : y / (h - 1);
+            const [sx, sy] = startPt;
+            const [ex, ey] = endPt;
+            const vx = ex - sx, vy = ey - sy;
+            const rx = u - sx, ry = v - sy;
+            const denom = vx*vx + vy*vy;
+            if (denom === 0) return 0;
+            const t = (rx*vx + ry*vy) / denom;
+            return t < 0 ? 0 : t > 1 ? 1 : t;
+        }
+
+        function interpColor(mode, startRgbInt, endRgbInt, t, interpMode) {
+            t = clamp01(t);
+            
+            if (interpMode === 'Smoothstep') t = smoothstepCurve(t);
+            else if (interpMode === 'Smootherstep') t = smootherstepCurve(t);
+            
+            if (mode === 'RGB') {
+                const [sr, sg, sb] = startRgbInt;
+                const [er, eg, eb] = endRgbInt;
+                return rgbIntToHex([
+                    sr + (er - sr) * t,
+                    sg + (eg - sg) * t,
+                    sb + (eb - sb) * t
+                ]);
+            }
+            
+            const [sr, sg, sb] = rgbIntToNorm(startRgbInt);
+            const [er, eg, eb] = rgbIntToNorm(endRgbInt);
+            
+            if (mode === 'HSL') {
+                const [sh, sl, ss] = rgbToHsl(sr, sg, sb);
+                const [eh, el, es] = rgbToHsl(er, eg, eb);
+                const h = shortestHue(sh, eh, t);
+                const l = sl + (el - sl) * t;
+                const s = ss + (es - ss) * t;
+                const [r, g, b] = hslToRgb(h, l, s);
+                return rgbIntToHex(rgbNormToInt([r, g, b]));
+            }
+            
+            if (mode === 'HSV') {
+                const [sh, ss, sv] = rgbToHsv(sr, sg, sb);
+                const [eh, es, ev] = rgbToHsv(er, eg, eb);
+                const h = shortestHue(sh, eh, t);
+                const s = ss + (es - ss) * t;
+                const v = sv + (ev - sv) * t;
+                const [r, g, b] = hsvToRgb(h, s, v);
+                return rgbIntToHex(rgbNormToInt([r, g, b]));
+            }
+            
+            if (mode === 'OKLAB' || mode === 'OKLCH') {
+                const s_ok = rgbNormToOklab([sr, sg, sb]);
+                const e_ok = rgbNormToOklab([er, eg, eb]);
+                
+                if (mode === 'OKLAB') {
+                    const L = s_ok[0] + (e_ok[0] - s_ok[0]) * t;
+                    const a = s_ok[1] + (e_ok[1] - s_ok[1]) * t;
+                    const b = s_ok[2] + (e_ok[2] - s_ok[2]) * t;
+                    const [r, g, bVal] = oklabToRgbNorm([L, a, b]);
+                    return rgbIntToHex(rgbNormToInt([r, g, bVal]));
+                } else {
+                    const [s_l, s_c, s_h] = oklabToOklch(s_ok);
+                    const [e_l, e_c, e_h] = oklabToOklch(e_ok);
+                    const L = s_l + (e_l - s_l) * t;
+                    const C = s_c + (e_c - s_c) * t;
+                    const H = shortestHue(s_h, e_h, t);
+                    const oklab = oklchToOklab([L, C, H]);
+                    const [r, g, bVal] = oklabToRgbNorm(oklab);
+                    return rgbIntToHex(rgbNormToInt([r, g, bVal]));
+                }
+            }
+            
+            return rgbIntToHex(startRgbInt);
+        }
+
+        function applyGradientToText(text, startHex, endHex, startPos, endPos, mode, interpMode, ditherAmount) {
+            if (!text) return { bbcode: '', html: '' };
+            
+            const lines = text.split('\n');
+            const w = Math.max(...lines.map(l => l.length), 0);
+            const h = lines.length;
+            const spt = parsePosition(startPos);
+            const ept = parsePosition(endPos);
+            const s_rgb = hexToRgbInt(startHex);
+            const e_rgb = hexToRgbInt(endHex);
+            
+            const bbcodeLines = [];
+            const htmlLines = [];
+            
+            lines.forEach((line, y) => {
+                const bbcodeChars = [];
+                const htmlChars = [];
+                
+                [...line].forEach((ch, x) => {
+                    if (ch === ' ') {
+                        bbcodeChars.push(ch);
+                        htmlChars.push(ch);
+                        return;
+                    }
+                    
+                    let t = computeT(x, y, w, h, spt, ept);
+                    
+                    if (ditherAmount > 0) {
+                        const jitter = (Math.random() - 0.5) * 2 * (ditherAmount / 100);
+                        t = clamp01(t + jitter);
+                    }
+                    
+                    const hexc = interpColor(mode, s_rgb, e_rgb, t, interpMode);
+                    bbcodeChars.push(`[color=${hexc}]${ch}[/color]`);
+                    htmlChars.push(`<span style="color:${hexc}">${ch}</span>`);
+                });
+                
+                bbcodeLines.push(bbcodeChars.join(''));
+                htmlLines.push(htmlChars.join(''));
+            });
+            
+            return {
+                bbcode: bbcodeLines.join('\n'),
+                html: htmlLines.join('\n')
+            };
+        }
+
+        function updateGradient() {
+            const text = document.getElementById('input-textarea').value;
+            const result = applyGradientToText(
+                text,
+                gradient1.color,
+                gradient2.color,
+                gradient1.position,
+                gradient2.position,
+                gradientMode,
+                interpolationMode,
+                ditheringEnabled ? ditheringIntensity : 0
+            );
+            
+            bbCodeOutput = result.bbcode;
+            document.getElementById('output-content').innerHTML = result.html;
+        }
+
+        function copyOutput() {
+            navigator.clipboard.writeText(bbCodeOutput).then(() => {
+                const icon = document.getElementById('copy-icon');
+                icon.innerHTML = '<polyline points="20 6 9 17 4 12"></polyline>';
+                icon.style.stroke = '#4ECDC4';
+                setTimeout(() => {
+                    icon.innerHTML = '<rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>';
+                    icon.style.stroke = 'currentColor';
+                }, 2000);
+            });
+        }
+
+        function openGuide() {
+            const modal = document.getElementById('guide-modal');
+            const content = document.getElementById('guide-modal-content');
+            modal.classList.remove('hidden', 'fadeOut');
+            modal.classList.add('fadeIn');
+            content.classList.remove('slideOut');
+            content.classList.add('slideIn');
+            guideClosing = false;
+        }
+
+        function closeGuide() {
+            guideClosing = true;
+            const modal = document.getElementById('guide-modal');
+            const content = document.getElementById('guide-modal-content');
+            modal.classList.remove('fadeIn');
+            modal.classList.add('fadeOut');
+            content.classList.remove('slideIn');
+            content.classList.add('slideOut');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                guideClosing = false;
+            }, 300);
+        }
+
+        function closeGuideIfOverlay(event) {
+            if (event.target.id === 'guide-modal') {
+                closeGuide();
+            }
+        }
+
+        function openColorPicker(num) {
+            // Placeholder - can add color picker modal if needed
+            alert('Color picker - click on the color square or type HEX code directly!');
+        }
+    </script>
+</body>
+</html>
