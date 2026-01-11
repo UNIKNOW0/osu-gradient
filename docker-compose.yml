@@ -3,4 +3,4 @@ services:
     build: .
     image: osu-gradient
     ports:
-      - "80:80"
+      - "7270:80"
