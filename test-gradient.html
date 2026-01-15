@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Gradient Test</title>
+    <style>
+        body {
+            font-family: monospace;
+            background: #0a0a0a;
+            color: white;
+            padding: 20px;
+        }
+        .test-line {
+            margin: 10px 0;
+            font-size: 14px;
+            letter-spacing: 2px;
+        }
+        .info {
+            background: #222;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h2>Linear Gradient Test</h2>
+    <div class="info">
+        <div>Start: top-left [0, 0] - Color: #FF0000 (Red)</div>
+        <div>End: top-right [1, 0] - Color: #0000FF (Blue)</div>
+        <div>Expected: Smooth transition from Red (left) to Blue (right)</div>
+    </div>
+    <div id="linear-test" class="test-line"></div>
+
+    <h2>Radial Gradient Test</h2>
+    <div class="info">
+        <div>Center: center [0.5, 0.5] - Color: #FF0000 (Red)</div>
+        <div>Radius: to right edge [1, 0.5] - Color: #0000FF (Blue)</div>
+        <div>Expected: Red in center, transitioning to Blue outward</div>
+    </div>
+    <div id="radial-test" class="test-line"></div>
+
+    <h2>Debug Info</h2>
+    <div id="debug" class="info"></div>
+
+    <script>
+        // Color interpolation (simple RGB)
+        function hexToRgb(hex) {
+            const s = hex.replace('#', '');
+            return [
+                parseInt(s.substr(0, 2), 16),
+                parseInt(s.substr(2, 2), 16),
+                parseInt(s.substr(4, 2), 16)
+            ];
+        }
+
+        function rgbToHex(r, g, b) {
+            r = Math.max(0, Math.min(255, Math.round(r)));
+            g = Math.max(0, Math.min(255, Math.round(g)));
+            b = Math.max(0, Math.min(255, Math.round(b)));
+            return '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0').toUpperCase()).join('');
+        }
+
+        function interpColor(startHex, endHex, t) {
+            const [sr, sg, sb] = hexToRgb(startHex);
+            const [er, eg, eb] = hexToRgb(endHex);
+            return rgbToHex(
+                sr + (er - sr) * t,
+                sg + (eg - sg) * t,
+                sb + (eb - sb) * t
+            );
+        }
+
+        // Gradient computation
+        function computeLinear(x, y, w, h, startPt, endPt) {
+            const u = w <= 1 ? 0.5 : x / (w - 1);
+            const v = h <= 1 ? 0.5 : y / (h - 1);
+            const [sx, sy] = startPt;
+            const [ex, ey] = endPt;
+
+            const dx = ex - sx;
+            const dy = ey - sy;
+            const lengthSquared = dx * dx + dy * dy;
+
+            if (lengthSquared === 0) return 0;
+
+            const projection = ((u - sx) * dx + (v - sy) * dy) / lengthSquared;
+            return Math.max(0, Math.min(1, projection));
+        }
+
+        function computeRadial(x, y, w, h, startPt, endPt) {
+            const u = w <= 1 ? 0.5 : x / (w - 1);
+            const v = h <= 1 ? 0.5 : y / (h - 1);
+            const [sx, sy] = startPt;
+            const [ex, ey] = endPt;
+
+            const centerX = sx;
+            const centerY = sy;
+
+            const dx = u - centerX;
+            const dy = v - centerY;
+            const distFromCenter = Math.sqrt(dx * dx + dy * dy);
+
+            const radiusDx = ex - sx;
+            const radiusDy = ey - sy;
+            const maxRadius = Math.sqrt(radiusDx * radiusDx + radiusDy * radiusDy);
+
+            if (maxRadius === 0) return 0;
+
+            const t = distFromCenter / maxRadius;
+            return Math.min(1, t);
+        }
+
+        // Test linear gradient
+        function testLinear() {
+            const testString = '█'.repeat(90);
+            const startColor = '#FF0000';
+            const endColor = '#0000FF';
+            const startPt = [0, 0];
+            const endPt = [1, 0];
+            const w = testString.length;
+            const h = 1;
+
+            let html = '';
+            let debug = 'Linear Gradient Debug:\n';
+
+            for (let i = 0; i < testString.length; i++) {
+                const t = computeLinear(i, 0, w, h, startPt, endPt);
+                const color = interpColor(startColor, endColor, t);
+                html += `<span style="color:${color}">${testString[i]}</span>`;
+
+                if (i % 10 === 0) {
+                    debug += `Position ${i}: t=${t.toFixed(3)}, color=${color}\n`;
+                }
+            }
+
+            document.getElementById('linear-test').innerHTML = html;
+            return debug;
+        }
+
+        // Test radial gradient
+        function testRadial() {
+            const testString = '█'.repeat(90);
+            const startColor = '#FF0000';
+            const endColor = '#0000FF';
+            const startPt = [0.5, 0.5];  // Center
+            const endPt = [1, 0.5];       // Right edge
+            const w = testString.length;
+            const h = 1;
+
+            let html = '';
+            let debug = '\nRadial Gradient Debug:\n';
+
+            for (let i = 0; i < testString.length; i++) {
+                const t = computeRadial(i, 0, w, h, startPt, endPt);
+                const color = interpColor(startColor, endColor, t);
+                html += `<span style="color:${color}">${testString[i]}</span>`;
+
+                if (i % 10 === 0) {
+                    debug += `Position ${i}: t=${t.toFixed(3)}, color=${color}\n`;
+                }
+            }
+
+            document.getElementById('radial-test').innerHTML = html;
+            return debug;
+        }
+
+        // Run tests
+        const debug1 = testLinear();
+        const debug2 = testRadial();
+        document.getElementById('debug').innerText = debug1 + debug2;
+    </script>
+</body>
+</html>

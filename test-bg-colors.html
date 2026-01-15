@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Background Color Test</title>
+    <style>
+        body {
+            font-family: monospace;
+            background: #000;
+            color: white;
+            padding: 20px;
+        }
+        .test-box {
+            width: 300px;
+            height: 100px;
+            margin: 10px;
+            border: 1px solid #444;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+        .info {
+            background: #222;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h2>Background Color Test</h2>
+
+    <div class="info">
+        <strong>Expected values:</strong><br>
+        Hue = 0 or 360: RGB(56, 46, 46)<br>
+        Hue = 180: RGB(46, 56, 56)<br>
+        Formula: hsl(hue, 10%, 20%)
+    </div>
+
+    <div class="test-box" id="box-0" style="background: hsl(0, 10%, 20%);">
+        Hue = 0
+    </div>
+    <div id="rgb-0" class="info"></div>
+
+    <div class="test-box" id="box-180" style="background: hsl(180, 10%, 20%);">
+        Hue = 180
+    </div>
+    <div id="rgb-180" class="info"></div>
+
+    <div class="test-box" id="box-360" style="background: hsl(360, 10%, 20%);">
+        Hue = 360
+    </div>
+    <div id="rgb-360" class="info"></div>
+
+    <div class="info" id="result"></div>
+
+    <script>
+        function getRGB(element) {
+            const style = window.getComputedStyle(element);
+            const bg = style.backgroundColor;
+            const match = bg.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+            if (match) {
+                return {
+                    r: parseInt(match[1]),
+                    g: parseInt(match[2]),
+                    b: parseInt(match[3])
+                };
+            }
+            return null;
+        }
+
+        const rgb0 = getRGB(document.getElementById('box-0'));
+        const rgb180 = getRGB(document.getElementById('box-180'));
+        const rgb360 = getRGB(document.getElementById('box-360'));
+
+        document.getElementById('rgb-0').innerHTML =
+            `<strong>Actual RGB:</strong> (${rgb0.r}, ${rgb0.g}, ${rgb0.b})<br>
+             <strong>Expected:</strong> (56, 46, 46)<br>
+             <strong>Match:</strong> ${rgb0.r === 56 && rgb0.g === 46 && rgb0.b === 46 ? '✅ YES' : '❌ NO'}`;
+
+        document.getElementById('rgb-180').innerHTML =
+            `<strong>Actual RGB:</strong> (${rgb180.r}, ${rgb180.g}, ${rgb180.b})<br>
+             <strong>Expected:</strong> (46, 56, 56)<br>
+             <strong>Match:</strong> ${rgb180.r === 46 && rgb180.g === 56 && rgb180.b === 56 ? '✅ YES' : '❌ NO'}`;
+
+        document.getElementById('rgb-360').innerHTML =
+            `<strong>Actual RGB:</strong> (${rgb360.r}, ${rgb360.g}, ${rgb360.b})<br>
+             <strong>Expected:</strong> (56, 46, 46)<br>
+             <strong>Match:</strong> ${rgb360.r === 56 && rgb360.g === 46 && rgb360.b === 46 ? '✅ YES' : '❌ NO'}`;
+
+        const allMatch =
+            (rgb0.r === 56 && rgb0.g === 46 && rgb0.b === 46) &&
+            (rgb180.r === 46 && rgb180.g === 56 && rgb180.b === 56) &&
+            (rgb360.r === 56 && rgb360.g === 46 && rgb360.b === 46);
+
+        document.getElementById('result').innerHTML =
+            `<strong style="font-size: 16px;">Overall Test Result: ${allMatch ? '✅ PASSED' : '❌ FAILED'}</strong>`;
+    </script>
+</body>
+</html>

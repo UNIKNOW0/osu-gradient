@@ -1,6 +1,6 @@
 services:
-  web:
+  app:
     build: .
-    image: osu-gradient
     ports:
       - "7270:80"
+    container_name: osu-gradient
