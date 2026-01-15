@@ -1,15 +1,10 @@
 # osu! Gradient Generator
 
-🎨 Create beautiful color gradients for your osu! profile with ease!
+🎨 Create color gradients for your osu! profile!
 
 ---
 
-![Color Picker Screenshot](example1.png)
-
-
-## 📖 About
-
-osu! Gradient Generator is a web tool that allows you to create stunning text gradients for your osu! profile.
+<img width="986" height="497" alt="example1" src="https://github.com/user-attachments/assets/b1b1fe47-ada1-4f0d-829d-52a065e72b9e" />
 
 ---
 
@@ -97,3 +92,4 @@ This project is open source and available under the [WTFPL](https://www.wtfpl.ne
 ---
 
 Made with ❤️ for the osu! community
+
