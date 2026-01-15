@@ -1,6 +1,8 @@
 services:
   app:
-    build: .
+    pull_policy: build
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
       - "7270:80"
-    container_name: osu-gradient
