@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>osu gradient</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/lucide.min.css">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <style>
         * {
             margin: 0;
@@ -170,12 +170,16 @@
             width: 100px;
         }
 
+        input[type="range"] {
+            --thumb-color: #FF9F1C;
+        }
+
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
             width: 14px;
             height: 14px;
-            background: #FF9F1C;
+            background: var(--thumb-color, #FF9F1C);
             border-radius: 50%;
             cursor: pointer;
             transition: all 0.2s;
@@ -188,7 +192,7 @@
         input[type="range"]::-moz-range-thumb {
             width: 14px;
             height: 14px;
-            background: #FF9F1C;
+            background: var(--thumb-color, #FF9F1C);
             border-radius: 50%;
             cursor: pointer;
             border: none;
@@ -341,8 +345,6 @@
             top: 2px;
             left: 2px;
             transition: all 0.3s;
-
-
         }
 
         .toggle.active .toggle-handle {
@@ -382,6 +384,15 @@
             border: 2px solid rgba(0,0,0,0.5);
             box-shadow: 0 2px 8px rgba(0,0,0,0.4);
             z-index: 10;
+        }
+
+        .gradient-circle:hover {
+            transform: scale(1.3);
+        }
+
+        .gradient-circle.selected {
+            transform: scale(1.5);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.6);
         }
 
         .input-textarea {
@@ -435,6 +446,66 @@
             gap: 6px;
             color: #fff;
             font-size: 12px;
+        }
+
+        /* Color Picker Modal */
+        .color-picker-modal {
+            position: fixed;
+            background: rgba(15,15,15,0.98);
+            padding: 20px;
+            border-radius: 16px;
+            z-index: 10000;
+            border: 1px solid rgba(255,255,255,0.15);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+            backdrop-filter: blur(20px);
+        }
+
+        .color-picker-title {
+            font-size: 12px;
+            color: rgba(255,255,255,0.6);
+            font-weight: 500;
+            margin-bottom: 15px;
+        }
+
+        .color-wheel-container {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin-bottom: 15px;
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: crosshair;
+        }
+
+        .color-wheel-cursor {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            border: 2px solid white;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 0 1px rgba(0,0,0,0.3), 0 2px 4px rgba(0,0,0,0.4);
+            pointer-events: none;
+        }
+
+        .hue-slider-container {
+            margin-bottom: 15px;
+        }
+
+        .hue-label {
+            font-size: 11px;
+            color: rgba(255,255,255,0.5);
+            margin-bottom: 8px;
+        }
+
+        .hue-slider {
+            width: 100%;
+            height: 20px;
+            border-radius: 10px;
+            background: linear-gradient(to right, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000);
+            outline: none;
+            border: none;
+            cursor: pointer;
         }
 
         /* Modal */
@@ -538,7 +609,7 @@
         .info-box {
             background: rgba(255,159,28,0.1);
             border: 1px solid rgba(255,159,28,0.3);
-            borderRadius: 12px;
+            border-radius: 12px;
             padding: 15px;
             font-size: 14px;
             color: rgba(255,255,255,0.7);
@@ -566,13 +637,14 @@
         }
 
         .footer {
-    display: block;
-    width: 100%;
-    text-align: center;
-    margin-top: 30px;
-    font-size: 11px;
-    color: rgba(255,255,255,0.3);
-}
+            display: block;
+            width: 100%;
+            text-align: center;
+            margin-top: 30px;
+            font-size: 11px;
+            color: rgba(255,255,255,0.3);
+            text-decoration: none;
+        }
     </style>
 </head>
 <body>
@@ -597,8 +669,8 @@
                     <button class="lang-btn" data-lang="ru" onclick="setLanguage('ru')">RU</button>
                 </div>
                 <div class="bg-control">
-                    <div class="bg-indicator"></div>
-                    <input type="range" min="0" max="30" value="15" id="bg-slider" oninput="updateBgColor(this.value)">
+                    <div class="bg-indicator" id="bg-indicator"></div>
+                    <input type="range" min="0" max="360" value="0" id="bg-slider" oninput="updateBgColor(this.value)">
                 </div>
             </div>
         </div>
@@ -609,10 +681,10 @@
                 <!-- Configuration Panel -->
                 <div class="panel">
                     <div class="panel-title" id="config-title">CONFIGURATION</div>
-                    
+
                     <div style="font-size: 13px; margin-bottom: 10px; color: rgba(255,255,255,0.7);" id="grad-start-label">Gradient Start</div>
                     <div class="color-input-group">
-                        <div class="color-square" id="color1-square" style="background: #FF9F1C;" onclick="openColorPicker(1)"></div>
+                        <div class="color-square" id="color1-square" style="background: #FF9F1C;" onclick="openColorPicker(1, event)"></div>
                         <input type="text" class="hex-input" id="hex1-input" value="#FF9F1C" oninput="updateColorFromHex(1, this.value)">
                     </div>
 
@@ -622,15 +694,15 @@
 
                     <div style="font-size: 13px; margin-bottom: 10px; color: rgba(255,255,255,0.7);" id="grad-end-label">Gradient End</div>
                     <div class="color-input-group" style="margin-bottom: 0;">
-                        <div class="color-square" id="color2-square" style="background: #A855F7;" onclick="openColorPicker(2)"></div>
+                        <div class="color-square" id="color2-square" style="background: #A855F7;" onclick="openColorPicker(2, event)"></div>
                         <input type="text" class="hex-input" id="hex2-input" value="#A855F7" oninput="updateColorFromHex(2, this.value)">
                     </div>
 
                     <div style="margin-top: 25px;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                             <span class="panel-title" style="margin: 0;" id="presets-label">PRESETS</span>
-                            <button style="background: transparent; border: none; color: #FF9F1C; cursor: pointer; font-size: 11px; font-weight: 600; display: flex; align-items: center; gap: 6px;" onclick="randomGradient()">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <button class="btn-random" style="background: transparent; border: none; cursor: pointer; font-size: 11px; font-weight: 600; display: flex; align-items: center; gap: 6px;" onclick="randomGradient()">
+                                <svg class="random-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <polyline points="16 3 21 3 21 8"></polyline>
                                     <line x1="4" y1="20" x2="21" y2="3"></line>
                                     <polyline points="21 16 21 21 16 21"></polyline>
@@ -646,6 +718,19 @@
                             <div class="preset" style="background: linear-gradient(135deg, #F97316, #EF4444);" onclick="applyPreset('#F97316', '#EF4444')"></div>
                             <div class="preset" style="background: linear-gradient(135deg, #A855F7, #EC4899);" onclick="applyPreset('#A855F7', '#EC4899')"></div>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Gradient Type Panel -->
+                <div class="panel">
+                    <div class="panel-title" id="type-title">GRADIENT TYPE</div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                        <button class="mode-btn active" data-type="linear" onclick="setGradientType('linear')">
+                            <span id="type-linear">Linear</span>
+                        </button>
+                        <button class="mode-btn" data-type="radial" onclick="setGradientType('radial')">
+                            <span id="type-radial">Radial</span>
+                        </button>
                     </div>
                 </div>
 
@@ -689,9 +774,9 @@
                     <div>
                         <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 12px; color: rgba(255,255,255,0.6);">
                             <span id="intensity-label">Intensity</span>
-                            <span id="intensity-value">50%</span>
+                            <span id="intensity-value">0%</span>
                         </div>
-                        <input type="range" min="0" max="100" value="50" id="dither-slider" style="width: 100%;" oninput="updateDithering(this.value)">
+                        <input type="range" min="0" max="100" value="0" id="dither-slider" style="width: 100%;" oninput="updateDithering(this.value)">
                     </div>
                 </div>
             </div>
@@ -704,7 +789,23 @@
                     <div class="input-box-wrapper">
                         <div class="input-box" id="input-box">
                             <!-- Gradient circles will be added here by JS -->
-                            <textarea class="input-textarea" id="input-textarea" placeholder="Enter your text here..." oninput="updateGradient()">Dynamic Gradient</textarea>
+                            <textarea class="input-textarea" id="input-textarea" placeholder="Enter your text here..." oninput="updateGradient()">
+⣿⣿⠟⣁⠤⠒⠉⠁⠀⠀⠀⠀⠀⠂⠂⠙⢿⣿⣿⣿⣿⣿⣿  
+⣿⢣⠞⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⢿⣿⣿⣿⣿⣿  
+⢧⠏⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⢰⡦⣠⡟⢿⣿⣿⣿  
+⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⣼⡟⣿⢇⠸⣿⣿⣿  
+⠃⠀⠀⠀⢀⡄⠀⠀⠀⣄⠀⠀⣰⡄⠀⠀⠑⡹⢦⣄⠀⠀⠉⠛  
+⠀⠀⠀⠀⢸⣹⡄⣧⡀⢸⠆⠀⠐⢠⠀⠀⠀⠀♡  
+⠀⠀⠀⠀⢘⣿⣿⣿⣧⣿⣧⣴⣄⣠⣇⡀⣦ 𝒽𝒶𝓋𝑒  
+⠀⠀⠀⠀⠘⣿⠟⠉⡻⣿⣿⣿⣿⣿⣿⣿⡟ 𝒶  
+⡄⡀⠀⠀⠀⠉⠀⢤⣄⣹⣿⣿⣿⣿⣿⣿⠃ 𝓁𝑜𝓋𝑒𝓁𝓎  
+⣧⣷⡠⡀⠀⢀⣄⠀⠙⢿⣿⣿⣿⣿⡿⠃⠀ 𝒹𝒶𝓎  
+⣿⣿⣷⣿⣦⣾⣿⡀⠀⠀⠀⠀⠀⢉⣴⣶⣤⣀♡  
+⣿⣿⣿⣿⣿⣿⣿⡇⠀⢠⠀⠀⣴⣿⣿⣿⣿⣿⣿⣶⡄  
+⣿⣿⣿⣿⣿⣿⣿⡇⠀⢸⡆⢸⣿⣿⣿⣿⣿⣿⣿⣿⠃  
+⣿⣿⣿⣿⣿⣿⣿⡇⠀⢸⡇⠘⣿⣿⣿⣿⣿⣿⣿⡙  
+⣿⣿⣿⣿⣿⣿⣿⡇⠀⢸⡇⠀⢹⣿⣿⣿⣿⣿⡏
+                            </textarea>
                         </div>
                     </div>
                 </div>
@@ -727,8 +828,23 @@
             </div>
         </div>
 
-        <a id="footer-text" class="footer" href="https://www.twitch.tv/uniknow" target="_blank" rel="noopener noreferrer">made by uniknow
-        </a>
+        <a id="footer-text" class="footer" href="https://www.twitch.tv/uniknow" target="_blank" rel="noopener noreferrer">made by uniknow</a>
+    </div>
+
+    <!-- Color Picker Modal -->
+    <div id="color-picker" class="color-picker-modal hidden" onclick="event.stopPropagation()">
+        <div class="color-picker-title" id="color-picker-title">Gradient Start</div>
+
+        <div class="color-wheel-container" id="color-wheel">
+            <div class="color-wheel-cursor" id="color-cursor"></div>
+        </div>
+
+        <div class="hue-slider-container">
+            <div class="hue-label">HUE</div>
+            <input type="range" min="0" max="360" value="0" id="hue-slider" class="hue-slider">
+        </div>
+
+        <input type="text" class="hex-input" id="picker-hex-input" style="width: 200px; text-align: center; display: block;" placeholder="#FFFFFF">
     </div>
 
     <!-- Guide Modal -->
@@ -743,9 +859,7 @@
                 <span id="guide-title">How to use osu gradient</span>
             </h2>
 
-            <div id="guide-content">
-                <!-- Guide steps will be populated by JS -->
-            </div>
+            <div id="guide-content"></div>
 
             <button class="btn-primary" onclick="closeGuide()" id="guide-close-btn">Got it!</button>
         </div>
@@ -754,23 +868,19 @@
     <script>
         // State
         let currentLanguage = 'en';
-        let bgLightness = 15;
+        let bgHue = 0;
         let gradient1 = { color: '#FF9F1C', position: 'top-left' };
         let gradient2 = { color: '#A855F7', position: 'bottom-center' };
+        let gradientType = 'linear';
         let gradientMode = 'RGB';
         let interpolationMode = 'Linear';
-        let ditheringEnabled = true;
+        let ditheringEnabled = false;
         let ditheringIntensity = 0;
         let bbCodeOutput = '';
-        let guideClosing = false;
-
-        // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
-            const systemLang = navigator.language.toLowerCase();
-            setLanguage(systemLang.startsWith('en') ? 'ru' : 'en');
-            initGradientCircles();
-            updateGradient();
-        });
+        let currentPickerGradient = 1;
+        let pickerHue = 0;
+        let pickerSaturation = 100;
+        let pickerLightness = 50;
 
         // Translations
         const translations = {
@@ -782,6 +892,9 @@
                 gradEnd: 'Gradient End',
                 presets: 'PRESETS',
                 random: 'RANDOM',
+                typeTitle: 'GRADIENT TYPE',
+                typeLinear: 'Linear',
+                typeRadial: 'Radial',
                 modeTitle: 'GRADIENT MODE',
                 interpTitle: 'INTERPOLATION',
                 linear: 'Linear',
@@ -811,6 +924,9 @@
                 gradEnd: 'Конец градиента',
                 presets: 'ПРЕСЕТЫ',
                 random: 'СЛУЧАЙНЫЙ',
+                typeTitle: 'ТИП ГРАДИЕНТА',
+                typeLinear: 'Линейный',
+                typeRadial: 'Радиальный',
                 modeTitle: 'РЕЖИМ ГРАДИЕНТА',
                 interpTitle: 'ИНТЕРПОЛЯЦИЯ',
                 linear: 'Линейная',
@@ -834,10 +950,89 @@
             }
         };
 
+        // Dynamic color updates
+        function updateDynamicColors() {
+            const color1 = gradient1.color;
+            const color2 = gradient2.color;
+
+            // Update active mode/interpolation buttons (but not gradient type buttons)
+            document.querySelectorAll('.mode-btn[data-mode], .mode-btn[data-type], .interp-btn').forEach(btn => {
+                if (btn.classList.contains('active')) {
+                    btn.style.background = color1;
+                    btn.style.boxShadow = `0 0 12px ${color1}`;
+                } else {
+                    btn.style.background = '';
+                    btn.style.boxShadow = '';
+                }
+            });
+
+            // Update dither toggle
+            const ditherToggle = document.getElementById('dither-toggle');
+            if (ditherToggle) {
+                if (ditherToggle.classList.contains('active')) {
+                    ditherToggle.style.background = color1;
+                    ditherToggle.style.boxShadow = `0 0 12px ${color1}`;
+                } else {
+                    ditherToggle.style.background = '';
+                    ditherToggle.style.boxShadow = '';
+                }
+            }
+
+            // Update "How to use" button
+            const guideBtn = document.querySelector('.btn-guide');
+            if (guideBtn) {
+                guideBtn.style.color = color1;
+            }
+
+            // Update RANDOM button and icon
+            const randomBtn = document.querySelector('.btn-random');
+            if (randomBtn) {
+                randomBtn.style.color = color1;
+                const randomIcon = randomBtn.querySelector('.random-icon');
+                if (randomIcon) {
+                    randomIcon.style.stroke = color1;
+                    randomIcon.style.filter = `drop-shadow(0 0 4px ${color1})`;
+                }
+            }
+
+            // Update logo icon with gradient
+            const logoIcon = document.querySelector('.logo-icon');
+            if (logoIcon) {
+                logoIcon.style.background = `linear-gradient(135deg, ${color1}, ${color2})`;
+            }
+
+            // Update range sliders
+            document.querySelectorAll('input[type="range"]').forEach(slider => {
+                slider.style.setProperty('--thumb-color', color1);
+            });
+        }
+
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            setLanguage('en');
+            initGradientCircles();
+            initColorPicker();
+            updateGradient();
+            updateBgColor(0);
+            updateDynamicColors();
+
+            // Close color picker on outside click
+            document.addEventListener('click', (e) => {
+                const picker = document.getElementById('color-picker');
+                if (!picker.classList.contains('hidden') &&
+                    !picker.contains(e.target) &&
+                    !e.target.classList.contains('color-square') &&
+                    !e.target.classList.contains('gradient-circle')) {
+                    closeColorPicker();
+                }
+            });
+        });
+
         function setLanguage(lang) {
             currentLanguage = lang;
             const t = translations[lang];
-            
+
             document.getElementById('logo-text').textContent = t.title;
             document.getElementById('how-to-use-text').textContent = t.howToUse;
             document.getElementById('config-title').textContent = t.configTitle;
@@ -845,6 +1040,9 @@
             document.getElementById('grad-end-label').textContent = t.gradEnd;
             document.getElementById('presets-label').textContent = t.presets;
             document.getElementById('random-label').textContent = t.random;
+            document.getElementById('type-title').textContent = t.typeTitle;
+            document.getElementById('type-linear').textContent = t.typeLinear;
+            document.getElementById('type-radial').textContent = t.typeRadial;
             document.getElementById('mode-title').textContent = t.modeTitle;
             document.getElementById('interp-title').textContent = t.interpTitle;
             document.getElementById('interp-linear').textContent = t.linear;
@@ -858,7 +1056,6 @@
             document.getElementById('guide-title').textContent = t.guideTitle;
             document.getElementById('guide-close-btn').textContent = t.guideClose;
 
-            // Update lang buttons
             document.querySelectorAll('.lang-btn').forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.lang === lang);
             });
@@ -951,18 +1148,38 @@
         }
 
         function updateBgColor(value) {
-            bgLightness = parseInt(value);
+            bgHue = parseInt(value);
+            const indicator = document.getElementById('bg-indicator');
             const inputBox = document.getElementById('input-box');
             const outputBox = document.getElementById('output-box');
-            inputBox.style.background = `hsl(235, ${bgLightness}%, 25%)`;
-            outputBox.style.background = `hsl(235, ${bgLightness}%, 25%)`;
+
+            // Show pure color in indicator
+            indicator.style.background = `hsl(${bgHue}, 100%, 50%)`;
+
+            // Calculate correct background color
+            // At hue=0/360: RGB(56,46,46)
+            // At hue=180: RGB(46,56,56)
+            // This is HSL with hue rotation, saturation ~10%, lightness ~20%
+            const bgColor = `hsl(${bgHue}, 10%, 20%)`;
+            inputBox.style.background = bgColor;
+            outputBox.style.background = bgColor;
+        }
+
+        function setGradientType(type) {
+            gradientType = type;
+            document.querySelectorAll('.mode-btn[data-type]').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.type === type);
+            });
+            updateDynamicColors();
+            updateGradient();
         }
 
         function setGradientMode(mode) {
             gradientMode = mode;
-            document.querySelectorAll('.mode-btn').forEach(btn => {
+            document.querySelectorAll('.mode-btn[data-mode]').forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.mode === mode);
             });
+            updateDynamicColors();
             updateGradient();
         }
 
@@ -974,6 +1191,7 @@
                 const dot = btn.querySelector('div');
                 if (dot) dot.style.display = isActive ? 'block' : 'none';
             });
+            updateDynamicColors();
             updateGradient();
         }
 
@@ -981,6 +1199,7 @@
             ditheringEnabled = !ditheringEnabled;
             const toggle = document.getElementById('dither-toggle');
             toggle.classList.toggle('active', ditheringEnabled);
+            updateDynamicColors();
             updateGradient();
         }
 
@@ -997,6 +1216,7 @@
                 if (cleaned.length === 6 && /^[0-9A-F]+$/.test(cleaned)) {
                     gradient1.color = '#' + cleaned;
                     document.getElementById('color1-square').style.background = '#' + cleaned;
+                    updateCircleColors();
                     updateGradient();
                 }
             } else {
@@ -1004,6 +1224,7 @@
                 if (cleaned.length === 6 && /^[0-9A-F]+$/.test(cleaned)) {
                     gradient2.color = '#' + cleaned;
                     document.getElementById('color2-square').style.background = '#' + cleaned;
+                    updateCircleColors();
                     updateGradient();
                 }
             }
@@ -1016,6 +1237,7 @@
             document.getElementById('color2-square').style.background = color2;
             document.getElementById('hex1-input').value = color1.toUpperCase();
             document.getElementById('hex2-input').value = color2.toUpperCase();
+            updateCircleColors();
             updateGradient();
         }
 
@@ -1025,20 +1247,20 @@
                 const positions = ['top-left', 'top-center', 'top-right', 'center-left', 'center-right', 'bottom-left', 'bottom-center', 'bottom-right'];
                 return positions[Math.floor(Math.random() * positions.length)];
             };
-            
+
             const c1 = randomColor();
             const c2 = randomColor();
-            
+
             gradient1.color = c1;
             gradient1.position = randomPos();
             gradient2.color = c2;
             gradient2.position = randomPos();
-            
+
             document.getElementById('color1-square').style.background = c1;
             document.getElementById('color2-square').style.background = c2;
             document.getElementById('hex1-input').value = c1;
             document.getElementById('hex2-input').value = c2;
-            
+
             updateCircleColors();
             updateGradient();
         }
@@ -1049,6 +1271,7 @@
                 { id: 'top-center', x: 50, y: 0 },
                 { id: 'top-right', x: 100, y: 0 },
                 { id: 'center-left', x: 0, y: 50 },
+                { id: 'center', x: 50, y: 50 },
                 { id: 'center-right', x: 100, y: 50 },
                 { id: 'bottom-left', x: 0, y: 100 },
                 { id: 'bottom-center', x: 50, y: 100 },
@@ -1060,29 +1283,33 @@
                 const circle = document.createElement('div');
                 circle.className = 'gradient-circle';
                 circle.dataset.position = pos.id;
-                
+
                 const leftPos = pos.x === 0 ? '15px' : pos.x === 50 ? 'calc(50% - 7px)' : 'calc(100% - 29px)';
                 const topPos = pos.y === 0 ? '15px' : pos.y === 50 ? 'calc(50% - 7px)' : 'calc(100% - 29px)';
-                
+
                 circle.style.left = leftPos;
                 circle.style.top = topPos;
-                
-                circle.addEventListener('click', () => {
+
+                circle.addEventListener('click', (e) => {
+                    e.stopPropagation();
                     gradient1.position = pos.id;
                     updateCircleColors();
                     updateGradient();
+                    openColorPicker(1, e);
                 });
-                
+
                 circle.addEventListener('contextmenu', (e) => {
                     e.preventDefault();
+                    e.stopPropagation();
                     gradient2.position = pos.id;
                     updateCircleColors();
                     updateGradient();
+                    openColorPicker(2, e);
                 });
-                
+
                 inputBox.appendChild(circle);
             });
-            
+
             updateCircleColors();
         }
 
@@ -1091,19 +1318,191 @@
                 const pos = circle.dataset.position;
                 if (pos === gradient1.position) {
                     circle.style.background = gradient1.color;
-                    circle.style.boxShadow = `0 0 8px ${gradient1.color}`;
+                    circle.style.boxShadow = `0 0 12px ${gradient1.color}`;
+                    circle.classList.add('selected');
                 } else if (pos === gradient2.position) {
                     circle.style.background = gradient2.color;
-                    circle.style.boxShadow = `0 0 8px ${gradient2.color}`;
+                    circle.style.boxShadow = `0 0 12px ${gradient2.color}`;
+                    circle.classList.add('selected');
                 } else {
                     circle.style.background = '#FF9F1C';
                     circle.style.boxShadow = '0 2px 8px rgba(0,0,0,0.4)';
+                    circle.classList.remove('selected');
+                }
+            });
+            updateDynamicColors();
+        }
+
+        // Color Picker
+        function initColorPicker() {
+            const wheel = document.getElementById('color-wheel');
+            const hueSlider = document.getElementById('hue-slider');
+            const hexInput = document.getElementById('picker-hex-input');
+
+            // Update wheel background when hue changes
+            hueSlider.addEventListener('input', (e) => {
+                pickerHue = parseInt(e.target.value);
+                updateColorWheel();
+                updateColorFromPicker();
+            });
+
+            // Mouse handling for color wheel
+            wheel.addEventListener('mousedown', (e) => {
+                const handleMove = (e) => {
+                    const rect = wheel.getBoundingClientRect();
+                    const x = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+                    const y = Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
+                    pickerSaturation = x * 100;
+                    pickerLightness = (1 - y) * 100;
+                    updateCursorPosition();
+                    updateColorFromPicker();
+                };
+
+                handleMove(e);
+
+                const handleUp = () => {
+                    document.removeEventListener('mousemove', handleMove);
+                    document.removeEventListener('mouseup', handleUp);
+                };
+
+                document.addEventListener('mousemove', handleMove);
+                document.addEventListener('mouseup', handleUp);
+            });
+
+            hexInput.addEventListener('input', (e) => {
+                let hex = e.target.value.replace('#', '').toUpperCase();
+                if (hex.length === 6 && /^[0-9A-F]+$/.test(hex)) {
+                    hex = '#' + hex;
+                    const hsl = hexToHsl(hex);
+                    pickerHue = hsl.h;
+                    pickerSaturation = hsl.s;
+                    pickerLightness = hsl.l;
+                    hueSlider.value = pickerHue;
+                    updateColorWheel();
+                    updateCursorPosition();
+
+                    if (currentPickerGradient === 1) {
+                        gradient1.color = hex;
+                        document.getElementById('color1-square').style.background = hex;
+                        document.getElementById('hex1-input').value = hex;
+                    } else {
+                        gradient2.color = hex;
+                        document.getElementById('color2-square').style.background = hex;
+                        document.getElementById('hex2-input').value = hex;
+                    }
+                    updateCircleColors();
+                    updateGradient();
                 }
             });
         }
 
+        function openColorPicker(gradientNum, event) {
+            event.stopPropagation();
+            const picker = document.getElementById('color-picker');
+            const t = translations[currentLanguage];
+
+            currentPickerGradient = gradientNum;
+            document.getElementById('color-picker-title').textContent =
+                gradientNum === 1 ? t.gradStart : t.gradEnd;
+
+            const color = gradientNum === 1 ? gradient1.color : gradient2.color;
+            const hsl = hexToHsl(color);
+            pickerHue = hsl.h;
+            pickerSaturation = hsl.s;
+            pickerLightness = hsl.l;
+
+            document.getElementById('hue-slider').value = pickerHue;
+            document.getElementById('picker-hex-input').value = color.toUpperCase();
+            updateColorWheel();
+            updateCursorPosition();
+
+            // Position picker
+            const rect = event.target.getBoundingClientRect();
+            picker.style.left = (rect.right + 8) + 'px';
+            picker.style.top = rect.top + 'px';
+            picker.classList.remove('hidden');
+        }
+
+        function closeColorPicker() {
+            document.getElementById('color-picker').classList.add('hidden');
+        }
+
+        function updateColorWheel() {
+            const wheel = document.getElementById('color-wheel');
+            wheel.style.background = `
+                linear-gradient(to right, white, hsl(${pickerHue}, 100%, 50%)),
+                linear-gradient(to top, black, transparent)
+            `;
+            wheel.style.backgroundBlendMode = 'multiply';
+        }
+
+        function updateCursorPosition() {
+            const cursor = document.getElementById('color-cursor');
+            cursor.style.left = pickerSaturation + '%';
+            cursor.style.top = (100 - pickerLightness) + '%';
+        }
+
+        function updateColorFromPicker() {
+            const hex = hslToHex(pickerHue, pickerSaturation, pickerLightness);
+            document.getElementById('picker-hex-input').value = hex;
+
+            if (currentPickerGradient === 1) {
+                gradient1.color = hex;
+                document.getElementById('color1-square').style.background = hex;
+                document.getElementById('hex1-input').value = hex;
+            } else {
+                gradient2.color = hex;
+                document.getElementById('color2-square').style.background = hex;
+                document.getElementById('hex2-input').value = hex;
+            }
+            updateCircleColors();
+            updateGradient();
+        }
+
+        function hslToHex(h, s, l) {
+            l /= 100;
+            const a = s * Math.min(l, 1 - l) / 100;
+            const f = n => {
+                const k = (n + h / 30) % 12;
+                const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+                return Math.round(255 * color).toString(16).padStart(2, '0');
+            };
+            return `#${f(0)}${f(8)}${f(4)}`.toUpperCase();
+        }
+
+        function hexToHsl(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            if (!result) return { h: 0, s: 100, l: 50 };
+
+            let r = parseInt(result[1], 16) / 255;
+            let g = parseInt(result[2], 16) / 255;
+            let b = parseInt(result[3], 16) / 255;
+
+            const max = Math.max(r, g, b);
+            const min = Math.min(r, g, b);
+            let h, s, l = (max + min) / 2;
+
+            if (max === min) {
+                h = s = 0;
+            } else {
+                const d = max - min;
+                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                switch (max) {
+                    case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+                    case g: h = ((b - r) / d + 2) / 6; break;
+                    case b: h = ((r - g) / d + 4) / 6; break;
+                }
+            }
+
+            return {
+                h: Math.round(h * 360),
+                s: Math.round(s * 100),
+                l: Math.round(l * 100)
+            };
+        }
+
         // ==================== GRADIENT GENERATION ====================
-        
+
         function clamp01(x) {
             return Math.max(0, Math.min(1, x));
         }
@@ -1270,31 +1669,65 @@
         function parsePosition(posId) {
             const map = {
                 'top-left': [0, 0], 'top-center': [0.5, 0], 'top-right': [1, 0],
-                'center-left': [0, 0.5], 'center-right': [1, 0.5],
+                'center-left': [0, 0.5], 'center': [0.5, 0.5], 'center-right': [1, 0.5],
                 'bottom-left': [0, 1], 'bottom-center': [0.5, 1], 'bottom-right': [1, 1]
             };
             return map[posId] || [0.5, 0.5];
         }
 
-        function computeT(x, y, w, h, startPt, endPt) {
+        function computeT(x, y, w, h, startPt, endPt, type) {
+            // Normalize coordinates to 0-1 range
             const u = w <= 1 ? 0.5 : x / (w - 1);
             const v = h <= 1 ? 0.5 : y / (h - 1);
             const [sx, sy] = startPt;
             const [ex, ey] = endPt;
-            const vx = ex - sx, vy = ey - sy;
-            const rx = u - sx, ry = v - sy;
-            const denom = vx*vx + vy*vy;
-            if (denom === 0) return 0;
-            const t = (rx*vx + ry*vy) / denom;
-            return t < 0 ? 0 : t > 1 ? 1 : t;
+
+            if (type === 'linear') {
+                // Linear gradient from start point to end point
+                const dx = ex - sx;
+                const dy = ey - sy;
+                const lengthSquared = dx * dx + dy * dy;
+
+                if (lengthSquared === 0) return 0;
+
+                // Project current point onto the line from start to end
+                const projection = ((u - sx) * dx + (v - sy) * dy) / lengthSquared;
+
+                // Clamp between 0 and 1
+                return Math.max(0, Math.min(1, projection));
+            }
+
+            if (type === 'radial') {
+                // Radial gradient from center (start point) to edge (defined by end point distance)
+                const centerX = sx;
+                const centerY = sy;
+
+                // Distance from current point to center
+                const dx = u - centerX;
+                const dy = v - centerY;
+                const distFromCenter = Math.sqrt(dx * dx + dy * dy);
+
+                // Max radius is the distance from start to end point
+                const radiusDx = ex - sx;
+                const radiusDy = ey - sy;
+                const maxRadius = Math.sqrt(radiusDx * radiusDx + radiusDy * radiusDy);
+
+                if (maxRadius === 0) return 0;
+
+                // Calculate t based on distance from center
+                const t = distFromCenter / maxRadius;
+                return Math.min(1, t);
+            }
+
+            return 0;
         }
 
         function interpColor(mode, startRgbInt, endRgbInt, t, interpMode) {
             t = clamp01(t);
-            
+
             if (interpMode === 'Smoothstep') t = smoothstepCurve(t);
             else if (interpMode === 'Smootherstep') t = smootherstepCurve(t);
-            
+
             if (mode === 'RGB') {
                 const [sr, sg, sb] = startRgbInt;
                 const [er, eg, eb] = endRgbInt;
@@ -1304,10 +1737,10 @@
                     sb + (eb - sb) * t
                 ]);
             }
-            
+
             const [sr, sg, sb] = rgbIntToNorm(startRgbInt);
             const [er, eg, eb] = rgbIntToNorm(endRgbInt);
-            
+
             if (mode === 'HSL') {
                 const [sh, sl, ss] = rgbToHsl(sr, sg, sb);
                 const [eh, el, es] = rgbToHsl(er, eg, eb);
@@ -1317,7 +1750,7 @@
                 const [r, g, b] = hslToRgb(h, l, s);
                 return rgbIntToHex(rgbNormToInt([r, g, b]));
             }
-            
+
             if (mode === 'HSV') {
                 const [sh, ss, sv] = rgbToHsv(sr, sg, sb);
                 const [eh, es, ev] = rgbToHsv(er, eg, eb);
@@ -1327,11 +1760,11 @@
                 const [r, g, b] = hsvToRgb(h, s, v);
                 return rgbIntToHex(rgbNormToInt([r, g, b]));
             }
-            
+
             if (mode === 'OKLAB' || mode === 'OKLCH') {
                 const s_ok = rgbNormToOklab([sr, sg, sb]);
                 const e_ok = rgbNormToOklab([er, eg, eb]);
-                
+
                 if (mode === 'OKLAB') {
                     const L = s_ok[0] + (e_ok[0] - s_ok[0]) * t;
                     const a = s_ok[1] + (e_ok[1] - s_ok[1]) * t;
@@ -1349,13 +1782,13 @@
                     return rgbIntToHex(rgbNormToInt([r, g, bVal]));
                 }
             }
-            
+
             return rgbIntToHex(startRgbInt);
         }
 
-        function applyGradientToText(text, startHex, endHex, startPos, endPos, mode, interpMode, ditherAmount) {
+        function applyGradientToText(text, startHex, endHex, startPos, endPos, mode, interpMode, ditherAmount, type) {
             if (!text) return { bbcode: '', html: '' };
-            
+
             const lines = text.split('\n');
             const w = Math.max(...lines.map(l => l.length), 0);
             const h = lines.length;
@@ -1363,37 +1796,37 @@
             const ept = parsePosition(endPos);
             const s_rgb = hexToRgbInt(startHex);
             const e_rgb = hexToRgbInt(endHex);
-            
+
             const bbcodeLines = [];
             const htmlLines = [];
-            
+
             lines.forEach((line, y) => {
                 const bbcodeChars = [];
                 const htmlChars = [];
-                
+
                 [...line].forEach((ch, x) => {
                     if (ch === ' ') {
                         bbcodeChars.push(ch);
                         htmlChars.push(ch);
                         return;
                     }
-                    
-                    let t = computeT(x, y, w, h, spt, ept);
-                    
+
+                    let t = computeT(x, y, w, h, spt, ept, type);
+
                     if (ditherAmount > 0) {
                         const jitter = (Math.random() - 0.5) * 2 * (ditherAmount / 100);
                         t = clamp01(t + jitter);
                     }
-                    
+
                     const hexc = interpColor(mode, s_rgb, e_rgb, t, interpMode);
                     bbcodeChars.push(`[color=${hexc}]${ch}[/color]`);
                     htmlChars.push(`<span style="color:${hexc}">${ch}</span>`);
                 });
-                
+
                 bbcodeLines.push(bbcodeChars.join(''));
                 htmlLines.push(htmlChars.join(''));
             });
-            
+
             return {
                 bbcode: bbcodeLines.join('\n'),
                 html: htmlLines.join('\n')
@@ -1410,9 +1843,10 @@
                 gradient2.position,
                 gradientMode,
                 interpolationMode,
-                ditheringEnabled ? ditheringIntensity : 0
+                ditheringEnabled ? ditheringIntensity : 0,
+                gradientType
             );
-            
+
             bbCodeOutput = result.bbcode;
             document.getElementById('output-content').innerHTML = result.html;
         }
@@ -1436,11 +1870,9 @@
             modal.classList.add('fadeIn');
             content.classList.remove('slideOut');
             content.classList.add('slideIn');
-            guideClosing = false;
         }
 
         function closeGuide() {
-            guideClosing = true;
             const modal = document.getElementById('guide-modal');
             const content = document.getElementById('guide-modal-content');
             modal.classList.remove('fadeIn');
@@ -1449,7 +1881,6 @@
             content.classList.add('slideOut');
             setTimeout(() => {
                 modal.classList.add('hidden');
-                guideClosing = false;
             }, 300);
         }
 
@@ -1457,11 +1888,6 @@
             if (event.target.id === 'guide-modal') {
                 closeGuide();
             }
-        }
-
-        function openColorPicker(num) {
-            // Placeholder - can add color picker modal if needed
-            alert('Color picker - click on the color square or type HEX code directly!');
         }
     </script>
 </body>
